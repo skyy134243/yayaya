@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JelantahKita - Platform Distribusi Minyak & Oli Bekas</title>
-    <!-- Leaflet CSS untuk Peta -->
+    <title>JelantahKita - Platform Ekosistem Limbah Integrated</title>
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* --- VARIABEL WARNA JELANTAHKITA (HIJAU & KUNING) --- */
         :root {
             --green-main: #047857;
             --green-hover: #065F46;
@@ -22,364 +21,83 @@
             --card-bg: #FFFFFF;
             --border: #E2E8F0;
             --danger: #EF4444;
-            --radius-lg: 18px;
+            --radius-lg: 16px;
             --radius-md: 12px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-body); color: var(--dark); padding-bottom: 50px; }
+        body { background-color: var(--bg-body); color: var(--dark); padding-bottom: 60px; }
 
-        /* --- HEADER & NAVBAR --- */
-        .navbar {
-            background: var(--card-bg);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 2px solid var(--border);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            height: 72px;
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--dark);
-            text-decoration: none;
-        }
-        .brand-icon {
-            background: linear-gradient(135deg, var(--yellow-accent), var(--green-main));
-            color: white;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.2);
-        }
-        .brand span.highlight { color: var(--green-main); }
-        .brand span.tag { color: var(--yellow-hover); }
+        /* NAVBAR */
+        .navbar { background: var(--card-bg); position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid var(--border); }
+        .nav-container { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; height: 72px; }
+        .brand { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 800; color: var(--dark); text-decoration: none; }
+        .brand-icon { background: linear-gradient(135deg, var(--yellow-accent), var(--green-main)); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .brand span { color: var(--green-main); }
+        .nav-links { display: flex; gap: 6px; background: var(--bg-body); padding: 5px; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
+        .nav-btn { background: transparent; border: none; padding: 8px 14px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); border-radius: 8px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .nav-btn.active { background: var(--card-bg); color: var(--green-main); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
 
-        .nav-links {
-            display: flex;
-            gap: 8px;
-            background: var(--bg-body);
-            padding: 6px;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-        }
-        .nav-btn {
-            background: transparent;
-            border: none;
-            padding: 10px 18px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        .nav-btn:hover { color: var(--green-main); }
-        .nav-btn.active {
-            background: var(--card-bg);
-            color: var(--green-main);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-
-        /* --- LAYOUT UTAMA --- */
-        .main-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        /* CONTAINER & TABS */
+        .main-container { max-width: 1280px; margin: 24px auto; padding: 0 20px; }
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- HERO BANNER --- */
-        .hero-banner {
-            background: linear-gradient(135deg, var(--green-main) 0%, #024E38 60%, #15803D 100%);
-            border-radius: var(--radius-lg);
-            padding: 32px;
-            color: white;
-            margin-bottom: 28px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .hero-banner::after {
-            content: "";
-            position: absolute;
-            right: -50px;
-            top: -50px;
-            width: 200px;
-            height: 200px;
-            background: var(--yellow-accent);
-            opacity: 0.15;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        .hero-text h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
-        .hero-text p { opacity: 0.9; font-size: 0.95rem; max-width: 550px; line-height: 1.5; }
-        .hero-badge {
-            background: var(--yellow-light);
-            color: var(--yellow-hover);
-            font-size: 0.8rem;
-            font-weight: 800;
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        /* HERO & STATS METRICS */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .metric-card { background: var(--card-bg); border-radius: var(--radius-md); padding: 20px; border: 1.5px solid var(--border); box-shadow: var(--shadow); }
+        .metric-card.eco { background: linear-gradient(135deg, var(--green-light), #FFFFFF); border-color: var(--green-main); }
+        .metric-val { font-size: 1.6rem; font-weight: 900; color: var(--dark); margin-top: 6px; }
+        .metric-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
 
-        /* --- CARD STYLE --- */
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 22px;
-        }
-        .card-title { font-size: 1.25rem; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 10px; }
-        .card-subtitle { font-size: 0.85rem; color: var(--text-muted); }
+        /* CARDS & GRID */
+        .card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 24px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .card-title { font-size: 1.2rem; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
 
-        /* --- GRID HARGA (DASHBOARD 1) --- */
-        .price-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        .price-card {
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 22px;
-            transition: all 0.25s ease;
-            position: relative;
-        }
-        .price-card:hover { border-color: var(--yellow-accent); transform: translateY(-4px); box-shadow: var(--shadow); }
-        .price-card.highlight-card {
-            border-color: var(--green-main);
-            background: linear-gradient(180deg, var(--green-light) 0%, var(--card-bg) 100%);
-        }
-        .price-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .price-amount { font-size: 1.7rem; font-weight: 900; color: var(--dark); margin: 8px 0; }
-        .price-amount span { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
-        .price-change { font-size: 0.78rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; }
-        .up { background: var(--green-light); color: var(--green-main); }
-        .down { background: #FEE2E2; color: var(--danger); }
+        /* FORMS & INPUTS */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 6px; }
+        .form-input, .form-select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-size: 0.9rem; outline: none; transition: 0.2s; background: white; }
+        .form-input:focus, .form-select:focus { border-color: var(--green-main); }
 
-        /* CHART GRAFIK SIMULASI */
-        .chart-box {
-            background: var(--bg-body);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            margin-top: 15px;
-        }
-        .chart-bars {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 160px;
-            padding-top: 25px;
-            border-bottom: 2px dashed var(--border);
-        }
-        .bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%; }
-        .bar-fill {
-            width: 100%;
-            background: var(--yellow-accent);
-            border-radius: 8px 8px 0 0;
-            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .bar-fill.active-bar { background: var(--green-main); }
-        .bar-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        /* BUTTONS */
+        .btn { padding: 12px 20px; border-radius: var(--radius-md); font-weight: 800; font-size: 0.9rem; border: none; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        .btn-green { background: var(--green-main); color: white; }
+        .btn-green:hover { background: var(--green-hover); }
+        .btn-yellow { background: var(--yellow-main); color: white; }
+        .btn-yellow:hover { background: var(--yellow-hover); }
+        .btn-dark { background: var(--dark); color: white; }
+        .btn-full { width: 100%; }
 
-        /* --- MAPS & LIST (DASHBOARD 2) --- */
-        #map { height: 420px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 22px; }
-        .search-bar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .input-search {
-            flex: 1;
-            padding: 14px 18px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            outline: none;
-            transition: border 0.2s;
-        }
-        .input-search:focus { border-color: var(--green-main); }
+        /* AI SCANNER BOX */
+        .ai-scanner-box { border: 2px dashed var(--yellow-accent); background: var(--yellow-light); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; position: relative; }
+        .scan-bar { height: 4px; background: var(--green-main); width: 0%; transition: width 0.3s; margin-top: 10px; border-radius: 2px; }
 
-        .mitra-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-        .mitra-item {
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            transition: 0.2s;
-        }
-        .mitra-item:hover { border-color: var(--green-main); }
-        .mitra-title { font-weight: 800; font-size: 0.95rem; color: var(--dark); }
-        .mitra-desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
-        .tag-role {
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: var(--yellow-light);
-            color: var(--yellow-hover);
-            display: inline-block;
-            margin-bottom: 4px;
-        }
+        /* MAP */
+        #map { height: 380px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border); }
 
-        /* --- FORM PENJUALAN (DASHBOARD 3) --- */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; color: var(--dark); }
-        .form-select, .form-input {
-            width: 100%;
-            padding: 13px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
-            outline: none;
-            background: var(--card-bg);
-            transition: all 0.2s;
-        }
-        .form-select:focus, .form-input:focus { border-color: var(--green-main); box-shadow: 0 0 0 4px var(--green-light); }
+        /* TABLES & BADGES */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: var(--bg-body); padding: 12px 14px; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; border-bottom: 2px solid var(--border); }
+        td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 0.88rem; font-weight: 600; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; display: inline-block; }
+        .badge-green { background: var(--green-light); color: var(--green-main); }
+        .badge-yellow { background: var(--yellow-light); color: var(--yellow-hover); }
 
-        .upload-dropzone {
-            border: 2px dashed var(--yellow-accent);
-            background: var(--yellow-light);
-            border-radius: var(--radius-md);
-            padding: 25px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .upload-dropzone:hover { background: #FEF08A; }
-        .preview-img { max-height: 130px; border-radius: 10px; margin-top: 12px; display: none; border: 2px solid var(--green-main); }
+        /* MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 28px; border-radius: var(--radius-lg); max-width: 500px; width: 100%; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .close-modal { position: absolute; top: 16px; right: 20px; font-size: 1.5rem; cursor: pointer; border: none; background: none; }
 
-        .calc-summary {
-            background: var(--green-light);
-            border: 1.5px solid rgba(4, 120, 87, 0.2);
-            border-radius: var(--radius-md);
-            padding: 20px;
-        }
-        .calc-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; }
-        .calc-row.total-row {
-            border-top: 1.5px dashed var(--green-main);
-            padding-top: 12px;
-            margin-top: 10px;
-            font-size: 1.25rem;
-            font-weight: 900;
-            color: var(--green-main);
-        }
-
-        /* --- BUTTONS --- */
-        .btn-primary {
-            background: var(--green-main);
-            color: white;
-            border: none;
-            padding: 15px 24px;
-            border-radius: var(--radius-md);
-            font-weight: 800;
-            font-size: 0.95rem;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
-        }
-        .btn-primary:hover { background: var(--green-hover); transform: translateY(-1px); }
-        .btn-secondary {
-            background: var(--yellow-main);
-            color: white;
-            border: none;
-            padding: 9px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-secondary:hover { background: var(--yellow-hover); }
-
-        /* --- PROFIL & RIWAYAT (DASHBOARD 4) --- */
-        .profile-card { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
-        .profile-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--yellow-main), var(--green-main));
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: 900;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .profile-info h3 { font-size: 1.3rem; font-weight: 800; }
-        .profile-info p { color: var(--text-muted); font-size: 0.88rem; }
-
-        .table-container { overflow-x: auto; }
-        .history-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .history-table th { background: var(--bg-body); padding: 12px 16px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; border-bottom: 2px solid var(--border); }
-        .history-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; }
-        
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: inline-block; }
-        .badge-done { background: var(--green-light); color: var(--green-main); }
-        .badge-process { background: var(--yellow-light); color: var(--yellow-hover); }
-
-        /* --- TOAST NOTIF --- */
-        .toast-notif {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: var(--dark);
-            color: white;
-            padding: 14px 22px;
-            border-radius: var(--radius-md);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: none;
-            z-index: 9999;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border-left: 5px solid var(--yellow-accent);
-        }
+        /* TOAST */
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--dark); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; font-size: 0.88rem; display: none; z-index: 3000; border-left: 5px solid var(--yellow-accent); }
     </style>
 </head>
 <body>
@@ -389,382 +107,458 @@
         <div class="nav-container">
             <a href="#" class="brand">
                 <div class="brand-icon">🛢️</div>
-                <div>Jelantah<span class="highlight">Kita</span></div>
+                <div>Jelantah<span>Kita</span></div>
             </a>
             <div class="nav-links">
-                <button class="nav-btn active" onclick="switchTab('tab-1', this)">📊 Harga Komoditas</button>
-                <button class="nav-btn" onclick="switchTab('tab-2', this)">📍 Peta Mitra</button>
-                <button class="nav-btn" onclick="switchTab('tab-3', this)">🛢️ Jual Limbah</button>
-                <button class="nav-btn" onclick="switchTab('tab-4', this)">👤 Akun Saya</button>
+                <button class="nav-btn active" onclick="switchTab('tab-dash', this)">📊 Utama & Dampak</button>
+                <button class="nav-btn" onclick="switchTab('tab-jual', this)">🛢️ AI & Penjualan</button>
+                <button class="nav-btn" onclick="switchTab('tab-track', this)">📍 Live Tracking</button>
+                <button class="nav-btn" onclick="switchTab('tab-b2b', this)">💼 B2B & Sertifikat</button>
+                <button class="nav-btn" onclick="switchTab('tab-pay', this)">💰 JelantahPay & Poin</button>
+                <button class="nav-btn" onclick="switchTab('tab-komunitas', this)">👥 RT/RW & Sanggah</button>
             </div>
         </div>
     </nav>
 
-    <!-- KONTEN UTAMA -->
     <div class="main-container">
 
-        <!-- HERO BANNER -->
-        <div class="hero-banner">
-            <div class="hero-text">
-                <span class="hero-badge">Ekosistem Pengelolaan Limbah</span>
-                <h1>Ubah Limbah Minyak Jadi Nilai Ekonomi 🌿</h1>
-                <p>JelantahKita menghubungkan pedagang bahan baku dan rumah tangga secara langsung ke penyalur dan produsen energi terbarukan.</p>
+        <!-- METRICS IMPACT COUNTER -->
+        <div class="metrics-grid">
+            <div class="metric-card eco">
+                <div class="metric-label">Air Soil Diselamatkan</div>
+                <div class="metric-val" id="impactWater">12.450 Liter</div>
+                <span style="font-size: 0.75rem; color: var(--green-main); font-weight:700;">🌱 Bebas Pencemaran Air</span>
+            </div>
+            <div class="metric-card eco">
+                <div class="metric-label">Pengurangan Emisi CO2</div>
+                <div class="metric-val" id="impactCO2">31.2 Kg</div>
+                <span style="font-size: 0.75rem; color: var(--green-main); font-weight:700;">🌍 Konversi Biodiesel B35</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Saldo JelantahPay</div>
+                <div class="metric-val" id="valSaldo">Rp 377.000</div>
+                <span style="font-size: 0.75rem; color: var(--yellow-hover); font-weight:700;">⚡ Siap Ditarik / COD</span>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Eco-Points Tersedia</div>
+                <div class="metric-val" id="valPoints">650 Poin</div>
+                <span style="font-size: 0.75rem; color: var(--yellow-hover); font-weight:700;">🎁 Bisa Tukar Sembako</span>
             </div>
         </div>
 
-        <!-- ==================== DASHBOARD 1: INFORMASI HARGA ==================== -->
-        <div id="tab-1" class="tab-content active">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Harga Pasar Limbah & Olahan</div>
-                        <div class="card-subtitle">Diperbarui secara real-time berdasarkan acuan industri penggilingan & energi</div>
-                    </div>
-                </div>
-
-                <div class="price-grid">
-                    <div class="price-card highlight-card">
-                        <div class="price-label">Minyak Jelantah (Grade A)</div>
-                        <div class="price-amount">Rp 6.800 <span>/ L</span></div>
-                        <span class="price-change up">▲ +3.2% Pekan Ini</span>
-                    </div>
-                    <div class="price-card">
-                        <div class="price-label">Oli Bekas (Mesin/Industri)</div>
-                        <div class="price-amount">Rp 4.200 <span>/ L</span></div>
-                        <span class="price-change up">▲ +1.5% Pekan Ini</span>
-                    </div>
-                    <div class="price-card">
-                        <div class="price-label">Biodiesel B35</div>
-                        <div class="price-amount">Rp 12.800 <span>/ L</span></div>
-                        <span class="price-change up">▲ +0.8% Pekan Ini</span>
-                    </div>
-                    <div class="price-card">
-                        <div class="price-label">BBM Bio-Avtur</div>
-                        <div class="price-amount">Rp 15.500 <span>/ L</span></div>
-                        <span class="price-change down">▼ -0.4% Pekan Ini</span>
-                    </div>
-                </div>
-
-                <!-- GRAFIK TREN HARGA -->
-                <div class="chart-box">
-                    <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 5px;">Tren Harga Minyak Jelantah (6 Bulan Terakhir)</div>
-                    <div class="chart-bars">
-                        <div class="bar-col"><div class="bar-fill" style="height: 55%;"></div><div class="bar-label">Apr</div></div>
-                        <div class="bar-col"><div class="bar-fill" style="height: 65%;"></div><div class="bar-label">Mei</div></div>
-                        <div class="bar-col"><div class="bar-fill" style="height: 60%;"></div><div class="bar-label">Jun</div></div>
-                        <div class="bar-col"><div class="bar-fill" style="height: 75%;"></div><div class="bar-label">Jul</div></div>
-                        <div class="bar-col"><div class="bar-fill" style="height: 85%;"></div><div class="bar-label">Agu</div></div>
-                        <div class="bar-col"><div class="bar-fill active-bar" style="height: 95%;"></div><div class="bar-label" style="color:var(--green-main)">Sep</div></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KETENTUAN KUALITAS LIMBAH -->
-            <div class="card">
-                <div class="card-title">Standar Kualitas & Potongan Harga Limbah</div>
-                <p style="font-size:0.9rem; color:var(--text-muted); margin: 8px 0 18px 0;">Harga akhir pembelian disesuaikan berdasarkan persentase <b>kandungan air</b> dan <b>endapan benda asing</b>.</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-                    <div style="padding:16px; border-radius:12px; background:var(--green-light); border:1px solid rgba(4,120,87,0.2);">
-                        <strong style="color:var(--green-main); font-size:0.95rem;">Grade A (Bersih)</strong>
-                        <p style="font-size:0.83rem; margin-top:6px; color:var(--text-muted);">Kandungan Kotoran/Air: 0% - 5%<br><b style="color:var(--dark)">Harga Diterima: 100% Full</b></p>
-                    </div>
-                    <div style="padding:16px; border-radius:12px; background:var(--yellow-light); border:1px solid rgba(245,158,11,0.2);">
-                        <strong style="color:var(--yellow-hover); font-size:0.95rem;">Grade B (Sedang)</strong>
-                        <p style="font-size:0.83rem; margin-top:6px; color:var(--text-muted);">Kandungan Kotoran/Air: 6% - 20%<br><b style="color:var(--dark)">Potongan Harga: 20%</b></p>
-                    </div>
-                    <div style="padding:16px; border-radius:12px; background:#FEE2E2; border:1px solid rgba(239,68,68,0.2);">
-                        <strong style="color:var(--danger); font-size:0.95rem;">Grade C (Kotor)</strong>
-                        <p style="font-size:0.83rem; margin-top:6px; color:var(--text-muted);">Kandungan Kotoran/Air: > 20%<br><b style="color:var(--dark)">Potongan Harga: 40%</b></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== DASHBOARD 2: PETA MITRA ==================== -->
-        <div id="tab-2" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Peta Persebaran Mitra Pengepul</div>
-                        <div class="card-subtitle">Temukan lokasi Pelapor Lapangan dan Agregator pengumpul terdekat di area Anda</div>
-                    </div>
-                </div>
-
-                <div class="search-bar">
-                    <input type="text" class="input-search" id="searchInput" onkeyup="filterMitra()" placeholder="Ketik nama lokasi atau jenis mitra (Pengepul, Agregator)...">
-                </div>
-
-                <div id="map"></div>
-
-                <div class="card-title" style="margin-bottom: 14px; font-size:1.1rem;">Daftar Mitra Aktif Terdekat</div>
-                <div class="mitra-cards" id="mitraList">
-                    <div class="mitra-item" data-name="Pelapor Lapangan Pak Joko">
-                        <div>
-                            <span class="tag-role">Pelapor Lapangan</span>
-                            <div class="mitra-title">Pelapor Lapangan Pak Joko</div>
-                            <div class="mitra-desc">📍 Jarak 1.5 km | Siap jemput minyak jelantah</div>
-                        </div>
-                        <button class="btn-secondary" onclick="showToast('Menghubungi Pak Joko...')">Kontak</button>
-                    </div>
-                    <div class="mitra-item" data-name="Pengepul Oli Jaya Sentosa">
-                        <div>
-                            <span class="tag-role" style="background:#E2E8F0; color:var(--dark)">Pengepul Spesialis</span>
-                            <div class="mitra-title">Pengepul Oli Jaya Sentosa</div>
-                            <div class="mitra-desc">📍 Jarak 3.1 km | Khusus oli bekas kendaraan/pabrik</div>
-                        </div>
-                        <button class="btn-secondary" onclick="showToast('Menghubungi Pengepul Oli...')">Kontak</button>
-                    </div>
-                    <div class="mitra-item" data-name="Agregator Bio-Energi Nusantara">
-                        <div>
-                            <span class="tag-role" style="background:var(--green-light); color:var(--green-main)">Agregator Utama</span>
-                            <div class="mitra-title">Agregator Bio-Energi Utama</div>
-                            <div class="mitra-desc">📍 Jarak 5.2 km | Mitra pabrik biodiesel</div>
-                        </div>
-                        <button class="btn-secondary" onclick="showToast('Menghubungi Agregator...')">Kontak</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== DASHBOARD 3: JUAL LIMBAH ==================== -->
-        <div id="tab-3" class="tab-content">
-            <div class="card">
-                <div class="card-title" style="margin-bottom: 6px;">Formulir Penjualan Limbah</div>
-                <div class="card-subtitle" style="margin-bottom: 24px;">Isi data limbah secara jujur untuk mempermudah verifikasi harga spesifik</div>
-
-                <form id="sellForm" onsubmit="handleFormSubmit(event)">
-                    <div class="form-grid">
-                        <div>
-                            <div class="form-group">
-                                <label>Pilih Jenis Limbah</label>
-                                <select class="form-select" id="inputJenis" onchange="calculatePrice()">
-                                    <option value="jelantah">Minyak Jelantah</option>
-                                    <option value="oli">Oli Bekas</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Volume Limbah (Liter)</label>
-                                <input type="number" class="form-input" id="inputVolume" placeholder="Contoh: 30" min="1" required oninput="calculatePrice()">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Estimasi Kondisi & Benda Asing (Air / Kotoran)</label>
-                                <select class="form-select" id="inputKualitas" onchange="calculatePrice()">
-                                    <option value="A">Grade A (Bersih / Air 0-5%)</option>
-                                    <option value="B">Grade B (Sedang / Air 6-20%) - Potongan 20%</option>
-                                    <option value="C">Grade C (Kotor / Air >20%) - Potongan 40%</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="form-group">
-                                <label>Foto Fisik Limbah (Wajib)</label>
-                                <div class="upload-dropzone" onclick="document.getElementById('inputFile').click()">
-                                    <div style="font-size: 2rem; margin-bottom: 6px;">📸</div>
-                                    <div style="font-weight: 800; color: var(--dark); font-size: 0.95rem;">Unggah Sampel Limbah</div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Klik untuk mengambil atau memilih foto</div>
-                                    <input type="file" id="inputFile" accept="image/*" style="display:none;" onchange="previewImage(event)">
-                                    <img id="preview" class="preview-img" alt="Preview Foto Limbah">
-                                </div>
-                            </div>
-
-                            <div class="calc-summary">
-                                <div class="calc-row">
-                                    <span>Harga Acuan Dasar:</span>
-                                    <span id="calcHargaBase">Rp 6.800 / L</span>
-                                </div>
-                                <div class="calc-row">
-                                    <span>Penyesuaian Grade:</span>
-                                    <span id="calcPotongan">100% (Tanpa Potongan)</span>
-                                </div>
-                                <div class="calc-row total-row">
-                                    <span>Estimasi Pendapatan:</span>
-                                    <span id="calcTotal">Rp 0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="margin-top: 24px;">Kirim Pengajuan ke Pelapor Lapangan</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ==================== DASHBOARD 4: AKUN SAYA ==================== -->
-        <div id="tab-4" class="tab-content">
-            <div class="card">
-                <div class="profile-card">
-                    <div class="profile-avatar">B</div>
-                    <div class="profile-info">
-                        <h3>Budi Santoso</h3>
-                        <p>Mitra Pedagang Bahan Baku & Rumah Tangga</p>
-                        <span class="badge badge-done" style="margin-top:6px;">Status: Terverifikasi</span>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 20px;">
-                    <div>
-                        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:800; text-transform:uppercase;">Alamat Email</div>
-                        <div style="font-weight:700; margin-top:4px;">budi.santoso@example.com</div>
-                    </div>
-                    <div>
-                        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:800; text-transform:uppercase;">Nomor Telepon</div>
-                        <div style="font-weight:700; margin-top:4px;">+62 812-9876-5432</div>
-                    </div>
-                </div>
-
-                <button class="btn-secondary" style="background:var(--dark)" onclick="showToast('Fitur ubah profil tersedia.')">Sunting Informasi Akun</button>
-            </div>
-
-            <div class="card">
-                <div class="card-title" style="margin-bottom: 16px;">Riwayat Penjualan Limbah</div>
-                <div class="table-container">
-                    <table class="history-table">
+        <!-- TAB 1: UTAMA & DAMPAK LINGKUNGAN -->
+        <div id="tab-dash" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">📉 Pergerakan Harga Komoditas</div>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Acuan harga resmi industri pengolahan energi terbarukan.</p>
+                    <table style="margin-bottom: 15px;">
                         <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Jenis</th>
-                                <th>Volume</th>
-                                <th>Total Diterima</th>
-                                <th>Status Logistics</th>
-                            </tr>
+                            <tr><th>Komoditas</th><th>Harga Pasar</th><th>Status</th></tr>
                         </thead>
-                        <tbody id="historyBody">
-                            <tr>
-                                <td>11 Sep 2026</td>
-                                <td>Minyak Jelantah</td>
-                                <td>40 Liter</td>
-                                <td>Rp 272.000</td>
-                                <td><span class="badge badge-done">Selesai Diambil</span></td>
-                            </tr>
-                            <tr>
-                                <td>03 Sep 2026</td>
-                                <td>Oli Bekas</td>
-                                <td>25 Liter</td>
-                                <td>Rp 105.000</td>
-                                <td><span class="badge badge-done">Selesai Diambil</span></td>
-                            </tr>
+                        <tbody>
+                            <tr><td>Minyak Jelantah Grade A</td><td><b>Rp 6.800 / L</b></td><td><span class="badge badge-green">▲ +3.2%</span></td></tr>
+                            <tr><td>Oli Bekas Industri</td><td><b>Rp 4.200 / L</b></td><td><span class="badge badge-green">▲ +1.5%</span></td></tr>
+                            <tr><td>Biodiesel Olahan (B35)</td><td><b>Rp 12.800 / L</b></td><td><span class="badge badge-yellow">● Stabil</span></td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏘️ Program Setor Kolektif RT/RW 04</div>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Pengumpulan minyak warga untuk dana kas dan kegiatan bersama.</p>
+                    <div style="background:var(--yellow-light); padding:16px; border-radius:12px; margin-bottom:15px;">
+                        <div style="display:flex; justify-content:space-between; font-weight:800; font-size:0.9rem;">
+                            <span>Capaian Bulanan RT 04</span>
+                            <span style="color:var(--yellow-hover)">180 / 250 Liter</span>
+                        </div>
+                        <div style="height:10px; background:#FDE68A; border-radius:5px; margin-top:8px; overflow:hidden;">
+                            <div style="width:72%; height:100%; background:var(--yellow-main);"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-yellow btn-full" onclick="showToast('Terdaftar pada program Kas RT 04!')">Gabung Setor Kolektif RT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: AI SCANNER & FORM JUAL -->
+        <div id="tab-jual" class="tab-content">
+            <div class="grid-2">
+                <!-- AI QUALITY DETECTOR -->
+                <div class="card">
+                    <div class="card-title">🤖 AI Detector Kualitas Minyak</div>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Pindai foto sampel minyak Anda untuk estimasi kadar air & kejernihan otomatis.</p>
+
+                    <div class="ai-scanner-box" onclick="document.getElementById('aiInputFile').click()">
+                        <div style="font-size:2.5rem;">📷</div>
+                        <div style="font-weight:800; margin-top:6px;">Unggah Sampel Limbah</div>
+                        <div style="font-size:0.78rem; color:var(--text-muted);">Format JPG/PNG (Maks 5MB)</div>
+                        <input type="file" id="aiInputFile" style="display:none;" onchange="processAIScan(event)">
+                        <div class="scan-bar" id="scanProgressBar"></div>
+                    </div>
+
+                    <div id="aiResultBox" style="display:none; margin-top:16px; padding:15px; border-radius:12px; background:var(--green-light); border:1px solid var(--green-main);">
+                        <div style="font-size:0.85rem; font-weight:800; color:var(--green-main);">HASIL DETEKSI AI:</div>
+                        <div style="font-size:1.1rem; font-weight:900; margin-top:4px;" id="aiGradeResult">Grade A (Sangat Baik)</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);" id="aiDescResult">Kandungan air ~2%, kejernihan optimal. Estimasi Harga: 100% Full.</div>
+                    </div>
+                </div>
+
+                <!-- FORM PENJUALAN + LOGISTIK -->
+                <div class="card">
+                    <div class="card-title">🛢️ Formulir Penjualan Limbah</div>
+                    <form onsubmit="submitFormJual(event)">
+                        <div class="form-group">
+                            <label>Jenis Limbah</label>
+                            <select class="form-select" id="jualJenis" onchange="calcJual()">
+                                <option value="6800">Minyak Jelantah (Rp 6.800/L)</option>
+                                <option value="4200">Oli Bekas (Rp 4.200/L)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Volume (Liter)</label>
+                            <input type="number" class="form-input" id="jualVol" min="1" placeholder="Contoh: 25" required oninput="calcJual()">
+                        </div>
+                        <div class="form-group">
+                            <label>Opsi Penjemputan</label>
+                            <select class="form-select" id="jualMetode">
+                                <option value="instan">Penjemputan Langsung (Kurir Express)</option>
+                                <option value="rutin">Langganan Penjemputan Rutin (Tiap Sabtu)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Metode Pembayaran</label>
+                            <select class="form-select">
+                                <option>JelantahPay (Otomatis & Poin Plus)</option>
+                                <option>Cash / COD Instant Timbangan QR</option>
+                            </select>
+                        </div>
+                        <div style="background:var(--bg-body); padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid var(--border);">
+                            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1rem;">
+                                <span>Estimasi Total:</span>
+                                <span style="color:var(--green-main);" id="jualTotal">Rp 0</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-green btn-full">Kirim & Minta Penjemputan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: LIVE TRACKING & RUTE KURIR -->
+        <div id="tab-track" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">📍 Live Tracking Penjemputan Kurir</div>
+                        <div class="card-subtitle">Pantau posisi armada penjemput secara real-time</div>
+                    </div>
+                    <button class="btn btn-yellow" onclick="simulasiGerakKurir()">⚡ Simulasi Pergerakan Kurir</button>
+                </div>
+                <div id="map"></div>
+                <div style="margin-top:20px; display:flex; gap:15px; flex-wrap:wrap;">
+                    <div style="flex:1; background:var(--bg-body); padding:15px; border-radius:12px; border:1px solid var(--border);">
+                        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:800;">PETUGAS PENJEMPUT</div>
+                        <div style="font-size:1rem; font-weight:800; margin-top:4px;">Pak Budi S. (Penjemput #04)</div>
+                        <div style="font-size:0.83rem; color:var(--green-main); font-weight:700; margin-top:2px;">Status: Menuju Lokasi Anda (Est: 8 Menit)</div>
+                    </div>
+                    <div style="flex:1; background:var(--bg-body); padding:15px; border-radius:12px; border:1px solid var(--border);">
+                        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:800;">VERIFIKASI DIGITAL</div>
+                        <div style="font-size:1rem; font-weight:800; margin-top:4px;">Timbangan QR Verified</div>
+                        <div style="font-size:0.83rem; color:var(--text-muted); margin-top:2px;">Akurat tanpa manipulasi berat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: B2B & SERTIFIKAT -->
+        <div id="tab-b2b" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">💼 Portal B2B, Usaha Besar & Bursa Grosir</div>
+                        <div class="card-subtitle">Khusus Restoran, Hotel, Pabrik, & Agregator Utama</div>
+                    </div>
+                    <button class="btn btn-green" onclick="openModal('modalCert')">📜 Unduh Sertifikat Green Business</button>
+                </div>
+                <div class="grid-2">
+                    <div style="border:1.5px solid var(--border); padding:20px; border-radius:12px;">
+                        <span class="badge badge-green" style="margin-bottom:8px;">Fitur Restoran & Hotel</span>
+                        <h4 style="font-size:1.1rem; font-weight:800;">Neraca Limbah & E-Invoice Otomatis</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin:8px 0 15px 0;">Unduh lapor audit limbah bulanan untuk sertifikasi standar kebersihan dan lingkungan.</p>
+                        <button class="btn btn-dark" onclick="showToast('Laporan Neraca Limbah terunduh (PDF)')">Unduh Neraca Bulanan</button>
+                    </div>
+                    <div style="border:1.5px solid var(--border); padding:20px; border-radius:12px;">
+                        <span class="badge badge-yellow" style="margin-bottom:8px;">Bursa Grosir (Bulk Sales)</span>
+                        <h4 style="font-size:1.1rem; font-weight:800;">Lelang Bulk 5.000+ Liter</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin:8px 0 15px 0;">Menghubungkan Agregator dengan Pabrik Bio-Avtur & Biodiesel Ekspor.</p>
+                        <button class="btn btn-yellow" onclick="showToast('Membuka Bursa Lelang Bulk Sales...')">Masuk Bursa Lelang</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: JELANTAHPAY & ECO-POIN -->
+        <div id="tab-pay" class="tab-content">
+            <div class="grid-2">
+                <!-- WALLET CARD -->
+                <div class="card">
+                    <div class="card-title">💳 Dompet Digital JelantahPay</div>
+                    <div style="background:linear-gradient(135deg, var(--green-main), #024E38); color:white; padding:24px; border-radius:16px; margin:16px 0;">
+                        <div style="font-size:0.8rem; opacity:0.8;">SALDO AKTIF</div>
+                        <div style="font-size:2rem; font-weight:900; margin:6px 0;" id="paySaldoText">Rp 377.000</div>
+                        <div style="font-size:0.8rem; opacity:0.9;">Tersambung ke: DANA / GoPay (+62 812-****-5432)</div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-yellow style='flex:1;'" onclick="openModal('modalWithdraw')">💸 Tarik ke E-Wallet</button>
+                        <button class="btn btn-dark style='flex:1;'" onclick="openModal('modalInvoice')">🧾 Lihat E-Invoice Transaksi</button>
+                    </div>
+                </div>
+
+                <!-- ECO POIN STORE -->
+                <div class="card">
+                    <div class="card-title">🎁 Tukar Eco-Points (Sembako & Pulsa)</div>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Poin Anda: <b style="color:var(--yellow-hover);" id="payPointsText">650 Poin</b></p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div style="border:1px solid var(--border); padding:12px; border-radius:10px; text-align:center;">
+                            <div style="font-size:1.5rem;">🍳</div>
+                            <div style="font-weight:800; font-size:0.85rem; margin-top:4px;">Minyak Goreng Baru 1L</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">500 Poin</div>
+                            <button class="btn btn-green btn-full" style="padding:6px; font-size:0.75rem;" onclick="redeemPoints(500, 'Minyak Goreng 1L')">Tukar Poin</button>
+                        </div>
+                        <div style="border:1px solid var(--border); padding:12px; border-radius:10px; text-align:center;">
+                            <div style="font-size:1.5rem;">📱</div>
+                            <div style="font-weight:800; font-size:0.85rem; margin-top:4px;">Voucher Pulsa 15rb</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">300 Poin</div>
+                            <button class="btn btn-green btn-full" style="padding:6px; font-size:0.75rem;" onclick="redeemPoints(300, 'Voucher Pulsa 15rb')">Tukar Poin</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: KOMUNITAS & SANGGAH -->
+        <div id="tab-komunitas" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">⭐ Rating & Transparansi Kurir</div>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Bantu jaga kualitas ekosistem dengan memberikan penilaian.</p>
+                    <div style="border:1px solid var(--border); padding:15px; border-radius:12px; margin-bottom:12px;">
+                        <div style="font-weight:800;">Penjemputan #8821 - Pak Budi</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Selesai 11 Sep 2026 - 40 Liter Jelantah</div>
+                        <div style="margin-top:8px;">
+                            <button class="btn btn-yellow" style="padding:4px 10px; font-size:0.75rem;" onclick="showToast('Terima kasih atas rating 5 bintang!')">⭐ 5 - Timbangan Sangat Pas</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🚨 Pusat Sanggah & Pengaduan Transaksi</div>
+                    <form onsubmit="event.preventDefault(); showToast('Pengaduan dikirim ke Tim Support!');">
+                        <div class="form-group">
+                            <label>ID Transaksi</label>
+                            <input type="text" class="form-input" placeholder="Contoh: #8821" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Kendala</label>
+                            <select class="form-select">
+                                <option>Ketidaksesuaian Berat Timbangan</option>
+                                <option>Kendala Transfer JelantahPay</option>
+                                <option>Penjemputan Terlambat</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Detail Pengaduan</label>
+                            <textarea class="form-input" rows="2" placeholder="Jelaskan detail masalah..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark btn-full">Kirim Pengaduan Sanggah</button>
+                    </form>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- TOAST NOTIFIKASI -->
-    <div id="toast" class="toast-notif">Pesan notifikasi</div>
+    <!-- MODAL INVOICE DIGITAL -->
+    <div class="modal" id="modalInvoice">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modalInvoice')">&times;</button>
+            <div style="text-align:center; margin-bottom:15px;">
+                <div style="font-weight:900; font-size:1.3rem; color:var(--green-main);">E-INVOICE JELANTAHKITA</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">ID Transaksi: #INV-2026-0911</div>
+            </div>
+            <div style="border-top:1.5px dashed var(--border); border-bottom:1.5px dashed var(--border); padding:12px 0; margin-bottom:15px; font-size:0.85rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Item:</span><b>Minyak Jelantah Grade A</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Volume:</span><b>40 Liter</b></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Verified QR Timbangan:</span><b style="color:var(--green-main)">VALID ✔</b></div>
+                <div style="display:flex; justify-content:space-between; font-size:1rem; font-weight:900; margin-top:8px;"><span>Total Diterima:</span><span>Rp 272.000</span></div>
+            </div>
+            <button class="btn btn-green btn-full" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+        </div>
+    </div>
+
+    <!-- MODAL SERTIFIKAT GREEN BUSINESS -->
+    <div class="modal" id="modalCert">
+        <div class="modal-content" style="text-align:center;">
+            <button class="close-modal" onclick="closeModal('modalCert')">&times;</button>
+            <div style="border:4px double var(--green-main); padding:20px; border-radius:12px; background:var(--green-light);">
+                <div style="font-size:2rem;">🌿</div>
+                <div style="font-size:1.1rem; font-weight:900; color:var(--green-main);">SERTIFIKAT GREEN BUSINESS</div>
+                <div style="font-size:0.8rem; margin:10px 0;">Diberikan Kepada:</div>
+                <div style="font-size:1.2rem; font-weight:900;">Resto Catering Sehat</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">Telah berkontribusi mendaur ulang 1.000+ Liter limbah minyak goreng secara bertanggung jawab.</div>
+            </div>
+            <button class="btn btn-green btn-full" style="margin-top:15px;" onclick="showToast('Sertifikat berhasil diunduh!')">Unduh Sertifikat (High-Res)</button>
+        </div>
+    </div>
+
+    <!-- MODAL WITHDRAW SALDO -->
+    <div class="modal" id="modalWithdraw">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('modalWithdraw')">&times;</button>
+            <div class="card-title" style="margin-bottom:12px;">Penarikan Saldo JelantahPay</div>
+            <div class="form-group">
+                <label>Pilih E-Wallet / Bank</label>
+                <select class="form-select">
+                    <option>DANA (0812-****-5432)</option>
+                    <option>GoPay (0812-****-5432)</option>
+                    <option>Bank BCA (1234567890)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nominal Penarikan (Rp)</label>
+                <input type="number" class="form-input" placeholder="Min. Rp 20.000" id="withdrawAmt">
+            </div>
+            <button class="btn btn-yellow btn-full" onclick="executeWithdraw()">Konfirmasi Penarikan Instan</button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Notifikasi</div>
 
     <!-- LEAFLET JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 1. LOGIKA TAB ---
-        let map;
-        let mapInitialized = false;
+        let currentSaldo = 377000;
+        let currentPoints = 650;
+        let map, driverMarker;
 
-        function switchTab(tabId, btnElement) {
+        // TAB SWITCHING
+        function switchTab(tabId, btn) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-            btnElement.classList.add('active');
+            btn.classList.add('active');
             document.getElementById(tabId).classList.add('active');
 
-            if (tabId === 'tab-2') {
-                if (!mapInitialized) {
-                    initMap();
-                    mapInitialized = true;
-                }
-                setTimeout(() => { map.invalidateSize(); }, 200);
+            if(tabId === 'tab-track' && !map) {
+                initMap();
             }
         }
 
-        // --- 2. LOGIKA PETA LEAFLET ---
+        // MAP & LIVE TRACKING
         function initMap() {
-            map = L.map('map').setView([-8.1724, 113.7000], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
+            map = L.map('map').setView([-8.1724, 113.7000], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-            L.marker([-8.1724, 113.7000]).addTo(map).bindPopup('<b>Lokasi Anda</b><br>Pedagang / Rumah Tangga').openPopup();
-            L.marker([-8.1650, 113.7150]).addTo(map).bindPopup('<b>Pelapor Lapangan Pak Joko</b><br>Penjemputan Terdekat');
-            L.marker([-8.1800, 113.6900]).addTo(map).bindPopup('<b>Agregator Bio-Energi Utama</b><br>Pusat Distribusi');
+            L.marker([-8.1724, 113.7000]).addTo(map).bindPopup('Lokasi Penjual (Anda)').openPopup();
+            driverMarker = L.marker([-8.1650, 113.7100]).addTo(map).bindPopup('Kurir Pak Budi S.');
         }
 
-        function filterMitra() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.mitra-item');
-
-            items.forEach(item => {
-                const name = item.getAttribute('data-name').toLowerCase();
-                item.style.display = name.includes(query) ? "flex" : "none";
-            });
+        function simulasiGerakKurir() {
+            if(!map) return;
+            showToast('Simulasi: Kurir bergerak mendekati posisi Anda...');
+            let lat = -8.1650;
+            let lng = 113.7100;
+            let interval = setInterval(() => {
+                lat -= 0.0008;
+                lng -= 0.0010;
+                driverMarker.setLatLng([lat, lng]);
+                map.panTo([lat, lng]);
+                if(lat <= -8.1720) {
+                    clearInterval(interval);
+                    showToast('Kurir telah sampai di lokasi Anda!');
+                }
+            }, 800);
         }
 
-        // --- 3. LOGIKA KALKULATOR HARGA & FORM ---
-        function calculatePrice() {
-            const jenis = document.getElementById('inputJenis').value;
-            const volume = parseFloat(document.getElementById('inputVolume').value) || 0;
-            const kualitas = document.getElementById('inputKualitas').value;
+        // AI SCANNER SIMULATION
+        function processAIScan(e) {
+            if(!e.target.files[0]) return;
+            const bar = document.getElementById('scanProgressBar');
+            const resultBox = document.getElementById('aiResultBox');
+            bar.style.width = '0%';
+            resultBox.style.display = 'none';
 
-            let hargaBase = (jenis === 'jelantah') ? 6800 : 4200;
-            let mult = 1.0;
-            let potonganTxt = "100% (Grade A - Full)";
-
-            if (kualitas === 'B') { mult = 0.8; potonganTxt = "Grade B (-20%)"; }
-            if (kualitas === 'C') { mult = 0.6; potonganTxt = "Grade C (-40%)"; }
-
-            const total = hargaBase * volume * mult;
-
-            document.getElementById('calcHargaBase').innerText = `Rp ${hargaBase.toLocaleString('id-ID')} / L`;
-            document.getElementById('calcPotongan').innerText = potonganTxt;
-            document.getElementById('calcTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+            let w = 0;
+            let timer = setInterval(() => {
+                w += 20;
+                bar.style.width = w + '%';
+                if(w >= 100) {
+                    clearInterval(timer);
+                    resultBox.style.display = 'block';
+                    showToast('AI Selesai Memindai Sampel!');
+                }
+            }, 150);
         }
 
-        function previewImage(event) {
-            const preview = document.getElementById('preview');
-            const file = event.target.files[0];
-            if (file) {
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block';
+        // CALC & JUAL
+        function calcJual() {
+            const hg = parseFloat(document.getElementById('jualJenis').value);
+            const vol = parseFloat(document.getElementById('jualVol').value) || 0;
+            document.getElementById('jualTotal').innerText = `Rp ${(hg * vol).toLocaleString('id-ID')}`;
+        }
+
+        function submitFormJual(e) {
+            e.preventDefault();
+            const vol = parseFloat(document.getElementById('jualVol').value);
+            const total = vol * parseFloat(document.getElementById('jualJenis').value);
+            
+            currentSaldo += total;
+            currentPoints += vol * 5; // 5 poin per liter
+
+            updateMetrics();
+            showToast('Pengajuan Terkirim! Saldo & Poin Bertambah.');
+            openModal('modalInvoice');
+        }
+
+        function updateMetrics() {
+            document.getElementById('valSaldo').innerText = `Rp ${currentSaldo.toLocaleString('id-ID')}`;
+            document.getElementById('valPoints').innerText = `${currentPoints} Poin`;
+            document.getElementById('paySaldoText').innerText = `Rp ${currentSaldo.toLocaleString('id-ID')}`;
+            document.getElementById('payPointsText').innerText = `${currentPoints} Poin`;
+        }
+
+        // WITHDRAW & REDEEM
+        function executeWithdraw() {
+            const amt = parseFloat(document.getElementById('withdrawAmt').value) || 0;
+            if(amt > currentSaldo || amt < 20000) {
+                showToast('Saldo tidak mencukupi / kurang dari batas minimum!');
+                return;
             }
+            currentSaldo -= amt;
+            updateMetrics();
+            closeModal('modalWithdraw');
+            showToast('Penarikan Berhasil Dikirim ke E-Wallet!');
         }
 
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            const jenisSelect = document.getElementById('inputJenis');
-            const jenisText = jenisSelect.options[jenisSelect.selectedIndex].text;
-            const volume = document.getElementById('inputVolume').value;
-            const total = document.getElementById('calcTotal').innerText;
-
-            if (volume <= 0) return;
-
-            // Masukkan transaksi ke tabel riwayat secara langsung
-            const historyBody = document.getElementById('historyBody');
-            const newRow = `
-                <tr>
-                    <td>Hari ini</td>
-                    <td>${jenisText}</td>
-                    <td>${volume} Liter</td>
-                    <td>${total}</td>
-                    <td><span class="badge badge-process">Proses Penjemputan</span></td>
-                </tr>
-            `;
-            historyBody.innerHTML = newRow + historyBody.innerHTML;
-
-            showToast("Pengajuan berhasil dikirim ke Pelapor Lapangan!");
-            document.getElementById('sellForm').reset();
-            document.getElementById('preview').style.display = 'none';
-            calculatePrice();
+        function redeemPoints(pts, item) {
+            if(currentPoints < pts) {
+                showToast('Poin Anda belum mencukupi!');
+                return;
+            }
+            currentPoints -= pts;
+            updateMetrics();
+            showToast(`Sukses menukar ${pts} Poin dengan ${item}!`);
         }
 
-        // --- 4. NOTIFIKASI TOAST ---
+        // MODAL HELPERS
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
         }
     </script>
 </body>
