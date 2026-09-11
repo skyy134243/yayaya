@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Distribusi Limbah & Oli Bekas</title>
+    <!-- Leaflet CSS untuk Peta -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary: #03AC0E; /* Hijau segar */
+            --primary-hover: #028C0B;
+            --bg: #f3f4f5;
+            --text-dark: #31353B;
+            --text-light: #6D7588;
+            --white: #ffffff;
+            --border: #e5e7e9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text-dark); }
+
+        /* Navbar / Tab Menu */
+        .navbar {
+            background-color: var(--white);
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            overflow-x: auto;
+        }
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .nav-item:hover { color: var(--primary); }
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* Container & Dashboards */
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .dashboard { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .dashboard.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .card h2 { margin-bottom: 20px; color: var(--text-dark); font-size: 1.4rem; }
+
+        /* Grid Informasi Harga */
+        .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .price-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .price-card h3 { color: var(--text-light); font-size: 1rem; margin-bottom: 10px; }
+        .price-card .price { color: var(--primary); font-size: 1.5rem; font-weight: bold; }
+        .info-alert {
+            background-color: #E5F9E6;
+            color: var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Map Container */
+        #map { height: 450px; width: 100%; border-radius: 12px; z-index: 1; border: 1px solid var(--border); }
+
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark); }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 1rem; color: var(--text-dark);
+            outline: none; transition: 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+        .file-upload { border: 2px dashed var(--border) !important; cursor: pointer; }
+        
+        .result-box {
+            background: #fafafa; border: 1px solid var(--border); padding: 15px;
+            border-radius: 8px; margin-top: 20px; display: none;
+        }
+        .result-box.active { display: block; }
+        .result-price { font-size: 1.8rem; color: var(--primary); font-weight: bold; margin-top: 5px; }
+
+        .btn {
+            background-color: var(--primary); color: var(--white);
+            border: none; padding: 14px 20px; border-radius: 8px;
+            cursor: pointer; font-size: 1rem; font-weight: bold; width: 100%;
+            transition: 0.3s;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+
+        /* Profil Info */
+        .profile-info { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .avatar { width: 80px; height: 80px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; }
+        .profile-details p { margin-bottom: 8px; color: var(--text-light); }
+        .profile-details strong { color: var(--text-dark); }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi -->
+    <div class="navbar">
+        <div class="nav-item active" onclick="switchTab('dash1')">Informasi Harga</div>
+        <div class="nav-item" onclick="switchTab('dash2')">Peta Mitra</div>
+        <div class="nav-item" onclick="switchTab('dash3')">Jual Limbah</div>
+        <div class="nav-item" onclick="switchTab('dash4')">Profil Akun</div>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard 1: Informasi Harga -->
+        <div id="dash1" class="dashboard active">
+            <div class="card">
+                <h2>Indeks Harga Komoditas & Limbah</h2>
+                <div class="price-grid">
+                    <div class="price-card">
+                        <h3>Minyak Jelantah (Grade A)</h3>
+                        <div class="price">Rp 6.500 <span style="font-size: 1rem; color:#6D7588">/ L</span></div>
+                    </div>
+                    <div class="price-card">
+                        <h3>Oli Bekas</h3>
+                        <div class="price">Rp 4.000 <span style="font-size: 1rem; color:#6D7588">/ L</span></div>
+                    </div>
+                    <div class="price-card">
+                        <h3>Biodiesel</h3>
+                        <div class="price">Rp 12.500 <span style="font-size: 1rem; color:#6D7588">/ L</span></div>
+                    </div>
+                    <div class="price-card">
+                        <h3>BBM Avtur</h3>
+                        <div class="price">Rp 15.200 <span style="font-size: 1rem; color:#6D7588">/ L</span></div>
+                    </div>
+                </div>
+                <div class="info-alert">
+                    <strong>Catatan Penting:</strong> Harga minyak jelantah dan oli bekas di atas adalah harga dasar untuk kondisi limbah berkualitas baik (Grade A). 
+                    Keberadaan <b>benda asing</b> atau <b>kandungan air</b> yang berlebih akan secara otomatis menurunkan kualitas limbah (Grade B/C) dan mengurangi harga beli akhir oleh perusahaan pengelola.
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard 2: Peta Mitra -->
+        <div id="dash2" class="dashboard">
+            <div class="card">
+                <h2>Mitra Pengepul & Agregator Terdekat</h2>
+                <p style="margin-bottom: 15px; color: var(--text-light);">Menampilkan titik pelapor lapangan, mitra pengepul, dan agregator untuk mempermudah distribusi rantai pasok ke perusahaan produsen BBM/Biodiesel.</p>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard 3: Penjualan & Kalkulasi Kualitas -->
+        <div id="dash3" class="dashboard">
+            <div class="card">
+                <h2>Formulir Penjualan Limbah</h2>
+                <div class="form-group">
+                    <label>Jenis Limbah</label>
+                    <select id="jenisLimbah">
+                        <option value="jelantah">Minyak Jelantah</option>
+                        <option value="oli">Oli Bekas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Volume / Jumlah (Liter)</label>
+                    <input type="number" id="volume" placeholder="Contoh: 50" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Foto Kondisi Limbah</label>
+                    <input type="file" class="file-upload" accept="image/*">
+                    <small style="color: var(--text-light);">Foto ini digunakan oleh mitra untuk memvalidasi kondisi limbah Anda.</small>
+                </div>
+                <div class="form-group">
+                    <label>Proporsi Benda Asing & Air (%)</label>
+                    <select id="kualitas" onchange="hitungEstimasi()">
+                        <option value="bersih">0% - 5% (Bersih - Harga Maksimal)</option>
+                        <option value="sedang">6% - 20% (Kotor Sedang - Potongan 20%)</option>
+                        <option value="kotor">Lebih dari 20% (Kotor/Banyak Air - Potongan 40%)</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="hitungEstimasi()">Cek Estimasi Harga</button>
+
+                <div class="result-box" id="resultBox">
+                    <p>Estimasi Harga Spesifik yang Akan Diterima:</p>
+                    <div class="result-price" id="totalHarga">Rp 0</div>
+                    <button class="btn" style="margin-top: 15px; background: #31353B;" onclick="alert('Permintaan penjemputan berhasil dikirim ke Pelapor Lapangan terdekat!')">Kirim ke Agregator</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard 4: Profil Akun -->
+        <div id="dash4" class="dashboard">
+            <div class="card">
+                <h2>Informasi Akun Pribadi</h2>
+                <div class="profile-info">
+                    <div class="avatar">B</div>
+                    <div class="profile-details">
+                        <p><strong>Nama Lengkap:</strong> Budi Santoso (Pedagang Bahan Baku)</p>
+                        <p><strong>Email:</strong> budi.pedagang@example.com</p>
+                        <p><strong>Nomor Telepon:</strong> +62 812-3456-7890</p>
+                        <p><strong>Status Kemitraan:</strong> Terverifikasi</p>
+                    </div>
+                </div>
+                <button class="btn">Edit Informasi Profil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // --- 1. Logika Pergantian Tab (Dashboard) ---
+        let map; // Variabel global untuk peta
+        let mapInitialized = false;
+
+        function switchTab(tabId) {
+            // Update navigasi
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update konten dashboard
+            document.querySelectorAll('.dashboard').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            // Render ulang peta jika tab peta dibuka (fix untuk Leaflet di display:none)
+            if (tabId === 'dash2') {
+                if (!mapInitialized) {
+                    initMap();
+                    mapInitialized = true;
+                }
+                setTimeout(() => { map.invalidateSize(); }, 100);
+            }
+        }
+
+        // --- 2. Logika Peta (Dashboard 2) ---
+        function initMap() {
+            // Koordinat default (Contoh: Jember/Jawa Timur sebagai titik pusat)
+            map = L.map('map').setView([-8.1724, 113.7000], 12);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Titik 1: Pengguna (Pedagang)
+            L.marker([-8.1724, 113.7000]).addTo(map)
+                .bindPopup('<b>Lokasi Anda</b><br>Pedagang Bahan Baku').openPopup();
+
+            // Titik 2: Pelapor Lapangan (Mitra Pengepul)
+            L.marker([-8.1650, 113.7150]).addTo(map)
+                .bindPopup('<b>Mitra Pengepul A (Pelapor Lapangan)</b><br>Jarak: 2.1 km<br><button onclick="alert(\'Menghubungi Mitra...\')">Hubungi</button>');
+
+            // Titik 3: Agregator Besar
+            L.marker([-8.1800, 113.6900]).addTo(map)
+                .bindPopup('<b>Agregator Pusat B</b><br>Menyalurkan langsung ke Pabrik Biodiesel');
+        }
+
+        // --- 3. Logika Kalkulasi Harga Spesifik (Dashboard 3) ---
+        function hitungEstimasi() {
+            const jenis = document.getElementById('jenisLimbah').value;
+            const volume = parseFloat(document.getElementById('volume').value);
+            const kualitas = document.getElementById('kualitas').value;
+            
+            if (isNaN(volume) || volume <= 0) {
+                alert("Masukkan volume limbah yang valid.");
+                return;
+            }
+
+            // Tentukan Harga Dasar
+            let hargaDasar = (jenis === 'jelantah') ? 6500 : 4000;
+
+            // Tentukan Multiplier Berdasarkan Proporsi Benda Asing / Air
+            let multiplier = 1.0; 
+            if (kualitas === 'sedang') multiplier = 0.8; // Potongan 20%
+            if (kualitas === 'kotor') multiplier = 0.6;  // Potongan 40%
+
+            // Hitung Harga Spesifik
+            const total = hargaDasar * volume * multiplier;
+
+            // Format ke Rupiah
+            const formatter = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            });
+
+            document.getElementById('totalHarga').innerText = formatter.format(total);
+            document.getElementById('resultBox').classList.add('active');
+        }
+    </script>
+</body>
+</html>
